@@ -38,20 +38,23 @@ const countActionReducerMap: ActionReducerMap<
   IncrementAction | DecrementByAction
 > = {
   [increment]: (count, { type }: IncrementAction) => count + 1,
-  [decrementBy]: (count, { payload: amount }: DecrementByAction) =>
+  [decrementBy]: (count, { type, payload: amount }: DecrementByAction) =>
     count - amount,
 };
 
 type CreateReducer = <State>(
   initialState: State,
-) => <ARM>(
+) => <ActionTypes extends string>(
   arm: {
-    [ActionType in keyof ARM]: PureReducer<
+    [ActionType in ActionTypes]: PureReducer<
       State,
       SimpleAction<ActionType> & PayloadAction<any, ActionType>
     >
   },
-) => Reducer<State, SimpleAction<keyof ARM> & PayloadAction<any, keyof ARM>>;
+) => Reducer<
+  State,
+  SimpleAction<ActionTypes> & PayloadAction<any, ActionTypes>
+>;
 const createReducer: CreateReducer = initialState => arm => (
   state = initialState,
   action,
