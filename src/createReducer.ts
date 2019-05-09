@@ -1,11 +1,11 @@
-type SimpleAction<ActionType> = {
+type SimpleAction<ActionType extends string> = {
   type: ActionType;
 };
-type Reducer<State, Action extends SimpleAction<Action['type']>> = (
+type Reducer<State, Action extends SimpleAction<string>> = (
   state: State,
   action: Action,
 ) => State;
-type PureReducer<State, Action extends SimpleAction<Action['type']>> = (
+type PureReducer<State, Action extends SimpleAction<string>> = (
   state: State,
   action: Action,
 ) => State;
@@ -24,11 +24,14 @@ const countActionReducerMap: ActionReducerMap<Count, IncrementAction> = {
 
 type CreateReducer = <State>(
   initialState: State,
-) => <ARM>(
+) => <ARM extends ActionReducerMap<State, SimpleAction<string>>>(
   arm: {
-    [ActionType in keyof ARM]: PureReducer<State, SimpleAction<ActionType>>
+    [ActionType in keyof ARM]: PureReducer<
+      State,
+      SimpleAction<ActionType extends string ? ActionType : string>
+    >
   },
-) => Reducer<State, SimpleAction<keyof ARM>>;
+) => PureReducer<State, SimpleAction<keyof ARM>>;
 const createReducer: CreateReducer = initialState => arm => (
   state = initialState,
   action,
