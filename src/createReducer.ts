@@ -22,7 +22,10 @@ type DecrementByAction = PayloadAction<Count, typeof decrementBy>;
 type CountAction = IncrementAction | DecrementByAction;
 type CountActionType = CountAction['type'];
 
-type ActionReducerMap<State, Action extends SimpleAction<string>> = {
+type ActionReducerMap<
+  State,
+  Action extends SimpleAction<string> | PayloadAction<any, string>
+> = {
   // cannot be a generic function because then the implementation would also have to be a generic function
   // cannot be a ternary expression because then there would have to be a parameter representing the reducer
   // even if there was a type parameter representing the reducer it would be a flattened version representing all reducers
