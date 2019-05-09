@@ -1,8 +1,14 @@
 type SimpleAction<ActionType> = {
   type: ActionType;
 };
-type Reducer<State, Action> = (state: State, action: Action) => State;
-type PureReducer<State, Action> = (state: State, action: Action) => State;
+type Reducer<State, Action extends SimpleAction<Action['type']>> = (
+  state: State,
+  action: Action,
+) => State;
+type PureReducer<State, Action extends SimpleAction<Action['type']>> = (
+  state: State,
+  action: Action,
+) => State;
 
 export type Count = number;
 const increment = 'increment';
