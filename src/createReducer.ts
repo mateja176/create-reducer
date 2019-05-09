@@ -19,6 +19,8 @@ const increment = 'increment';
 type IncrementAction = SimpleAction<typeof increment>;
 const decrementBy = 'decrementBy';
 type DecrementByAction = PayloadAction<Count, typeof decrementBy>;
+type CountAction = IncrementAction | DecrementByAction;
+type CountActionType = CountAction['type'];
 
 type ActionReducerMap<State, Action extends SimpleAction<string>> = {
   // cannot be a generic function because then the implementation would also have to be a generic function
