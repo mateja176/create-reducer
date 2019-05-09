@@ -1,20 +1,17 @@
-type SimpleAction<ActionType> = {
+type SimpleAction<ActionType extends string> = {
   type: ActionType;
 };
-interface PayloadAction<Payload, ActionType> extends SimpleAction<ActionType> {
+interface PayloadAction<Payload, ActionType extends string>
+  extends SimpleAction<ActionType> {
   payload: Payload;
 }
 type Reducer<
   State,
-  Action extends
-    | SimpleAction<Action['type']>
-    | PayloadAction<any, Action['type']>
+  Action extends SimpleAction<string> | PayloadAction<any, string>
 > = (state: State, action: Action) => State;
 type PureReducer<
   State,
-  Action extends
-    | SimpleAction<Action['type']>
-    | PayloadAction<any, Action['type']>
+  Action extends SimpleAction<string> | PayloadAction<any, string>
 > = (state: State, action: Action) => State;
 
 export type Count = number;
@@ -61,7 +58,7 @@ const createReducer: CreateReducer = initialState => arm => (
 ) => {
   const actionTypes = Object.keys(arm);
 
-  if (actionTypes.includes(action.type as string)) {
+  if (actionTypes.includes(action.type)) {
     return arm[action.type](state, action);
   } else {
     return state;
