@@ -23,14 +23,14 @@ type IncrementAction = SimpleAction<typeof increment>;
 const decrementBy = 'decrementBy';
 type DecrementByAction = PayloadAction<Count, typeof decrementBy>;
 
-type ActionReducerMap<
-  State,
-  Action extends SimpleAction<string> | PayloadAction<any, string>
-> = {
-  [ActionType in Action['type']]: <A extends SimpleAction<ActionType>>(
-    state: State,
-    action: A,
-  ) => State
+type ActionReducerMap<State, Action extends SimpleAction<string>> = {
+  // cannot be a generic function because then the implementation would also have to be a generic function
+  // cannot be a ternary expression because then there would have to be a parameter representing the reducer
+  // even if there was a type parameter representing the reducer it would be a flattened version representing all reducers
+  [ActionType in Action['type']]: PureReducer<
+    State,
+    SimpleAction<ActionType> & PayloadAction<any, ActionType>
+  >
 };
 
 const countActionReducerMap: ActionReducerMap<
@@ -42,28 +42,33 @@ const countActionReducerMap: ActionReducerMap<
     count - amount,
 };
 
-// type CreateReducer = <State>(
-//   initialState: State,
-// ) => <ARM>(
-//   arm: {
-//     [ActionType in keyof ARM]: PureReducer<State, SimpleAction<ActionType>>
-//   },
-// ) => Reducer<State, SimpleAction<keyof ARM>>;
-// const createReducer: CreateReducer = initialState => arm => (
-//   state = initialState,
-//   action,
-// ) => {
-//   const actionTypes = Object.keys(arm);
+type CreateReducer = <State>(
+  initialState: State,
+) => <ARM>(
+  arm: {
+    [ActionType in keyof ARM]: PureReducer<
+      State,
+      SimpleAction<ActionType> & PayloadAction<any, ActionType>
+    >
+  },
+) => Reducer<State, SimpleAction<keyof ARM> & PayloadAction<any, keyof ARM>>;
+const createReducer: CreateReducer = initialState => arm => (
+  state = initialState,
+  action,
+) => {
+  const actionTypes = Object.keys(arm);
 
-//   if (actionTypes.includes(action.type as string)) {
-//     return arm[action.type](state, action);
-//   } else {
-//     return state;
-//   }
-// };
+  if (actionTypes.includes(action.type as string)) {
+    return arm[action.type](state, action);
+  } else {
+    return state;
+  }
+};
 
-// const countReducer = createReducer(0)(countActionReducerMap);
+const countReducer = createReducer(0)(countActionReducerMap);
 
-// const countReducerInline = createReducer(0)({
-//   [increment]: (count, { type }: IncrementAction) => count + 1,
-// });
+const countReducerInline = createReducer(0)({
+  [increment]: (count, { type }: IncrementAction) => count + 1,
+  [decrementBy]: (count, { type, payload: amount }: DecrementByAction) =>
+    count - amount,
+});
