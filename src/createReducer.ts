@@ -27,13 +27,9 @@ type ActionReducerMap<
   State,
   Action extends SimpleAction<string> | PayloadAction<any, string>
 > = {
-  [ActionType in Action['type']]: <
-    A extends SimpleAction<ActionType> | PayloadAction<any, ActionType>
-  >(
+  [ActionType in Action['type']]: <A extends SimpleAction<ActionType>>(
     state: State,
-    action: A extends PayloadAction<infer P, ActionType>
-      ? PayloadAction<P, ActionType>
-      : SimpleAction<ActionType>,
+    action: A,
   ) => State
 };
 
